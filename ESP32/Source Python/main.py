@@ -5,12 +5,12 @@ from local_time import local_time
 from display_LCD1602 import LCD_Display
 from sensor_DS18B20 import sensor
 #Wifi detail
-SSID = 'Your wifi name'
-PASSWORD = 'Your Wifi Password'
+SSID = 'Express'
+PASSWORD = 'enoZsserpxE'
 #server deatil
-host = 'Server IP address or hostname'
-DEVICE_NAME = 'Device name from the server'
-API_KEY = 'The API key from the server'
+host = '10.1.1.9'
+DEVICE_NAME = 'test_sensor'
+API_KEY = '7b0dfe2abd683316672c33c89b7ecf234a13f53632f3c0aa1ac656c7e5956a30'
 port = 8000
 path = "/api/temperature/"
 
@@ -46,6 +46,7 @@ LCD = LCD_Display(SDA_PIN,SCL_PIN)
 #Inital temperature sensor DS18B20
 temp_sensor = sensor(TEMP_PIN)
 
+while_loop_counter = 0 #data will send to server every 2 mins while display refresh every 10 sec
 while True:
     time_string = localtime.get_display_time()
     hour = localtime.get_time()[3]
@@ -55,8 +56,11 @@ while True:
     else:
         LCD.display(time_string, "Temp:  "+str(temp), True)
     try:
-        send (host, port, path, DEVICE_NAME, API_KEY, temp)
+        while_loop_counter += 1
+        if while_loop_counter == 12:
+            send (host, port, path, DEVICE_NAME, API_KEY, temp)
+            while_loop_counter = 0
     except Exception as e:
         print (str(e))
         pass
-    time.sleep(120)
+    time.sleep(10)
