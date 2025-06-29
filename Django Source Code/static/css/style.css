@@ -1,0 +1,136 @@
+h1{
+    color: #5f5f5f;
+}
+a{
+    color: #fee336;
+    text-decoration: underline;
+}
+a:hover {
+    color: #FFFF00;
+}
+.list-opt{
+    background-color: #7c8781;
+    padding: 15px 25px;
+    border: 1px solid white;
+    font-size: 20px;
+    transition: background-color 0.1s linear ;
+    color: #fee336;
+}
+.list-opt:hover{
+    background-color: #626B66;
+}
+.list-opt-title{
+    background-color: #7c8781;
+    padding: 15px 25px;
+    border: 1px solid white;
+    font-size: 20px;
+    color: #fee336;
+    font-family: sans-serif;
+}
+
+.list-sub-opt{
+    transition: background-color 0.1s linear ;
+    padding: 5px 0px 5px 15px;
+    font-size: 15px;
+    color: #fee336;
+}
+.list-sub-opt:hover{
+    background-color: #626B66;
+}
+.row {
+    padding: 40px;
+}
+body{
+    background-color: #808080!important;
+    color:#5f5f5f!important;
+}
+.container {
+    background-color: white;
+    min-height: 1440px;
+}
+.title{
+    margin-bottom: 40px;
+    background-color: #ffd700;
+}
+.login input
+{
+    width: 250px;
+    border-radius: 5px;
+    border: 1px solid #cecece;
+}
+.logging select
+{
+    width: 50px;
+    border-radius: 5px;
+    border: 1px solid #cecece;
+}
+
+.form select {
+  width: 200px;
+}
+
+tbody{
+    color: #757575;
+}
+/* toggle the sensor's status */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+.switch input:disabled + .slider {
+  cursor: not-allowed; /* or use 'default' for normal pointer */
+  opacity: 0.6; /* optional: make it visually look disabled */
+}
+
+/* display current temperature and humility for all sensors */
+.data-table {
+    width: 60%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    font-size: 1.5em; /* Increase text size */
+}
+
+.data-table th,
+.data-table td {
+    border: 1px solid #ccc;
+    padding: 10px 15px;
+    text-align: center;
+}
+
+.data-table th {
+    background-color: #f2f2f2;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}

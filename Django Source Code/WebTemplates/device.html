@@ -1,0 +1,92 @@
+{% extends 'home.html' %}
+
+{% block content %}
+<h2> Devices and Sensors </h2>
+
+{% if error %}
+<h3>Error Information</h3>
+    {{ error }}
+{% endif %}
+
+{% if new %}
+    <a class="btn btn-primary" href="{% url 'register_device' %}">Register New Sensor</a>
+{% endif %}
+
+{% if search_form %}
+<a class="btn btn-primary" href="{% url 'register_device' %}">Register New Sensor</a>
+	<form class="form" method="post">
+		<br>
+		{% csrf_token %}
+		{{ search_form.as_p }}
+		<br><button class="btn btn-primary" type="submit">Search</button>
+	</form>
+{% endif %}
+
+{% if register_device %}
+<form class="register" method="post">
+    <br>
+    {% csrf_token %}
+    {{ register_device.as_p }}
+    <br>
+    <button class="btn btn-primary" type="submit">Register</button>
+</form>
+{% endif %}
+
+{% if devices %}
+<a class="btn btn-primary" href="{% url 'register_device' %}">Register New Sensor</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Device Name</th>
+            <th>Device Type</th>
+            <th>Active</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for device in devices %}
+            <tr>
+                <td>{{ device.Name }}</td>
+                <td>{{ device.Device_Type }}</td>
+                <td>
+                    <label class="switch" style="vertical-align: middle;">
+                        <input type="checkbox" {% if device.Is_Active %}checked{% endif %} disabled>
+                        <span class="slider round"></span>
+                    </label>
+                </td>
+                <td><a class="btn btn-primary" href="{% url 'list_device_id' device.id %}">More</a></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% if device %}
+    <h4> Device Name: {{ device.Name }}</h4>
+    <h4> Device Type: {{ device.Device_Type }}</h4>
+    <h4> API Key: {{ device.Api_Key }}</h4>
+    <table>
+        <tr>
+            <td><h4 style="margin: 0;">Active:</h4></td>
+            <td>
+                <form method="post" action="{% url 'toggle_device_status' device.id %}" style="margin: 0; display: inline;">
+                    {% csrf_token %}
+                    <label class="switch" style="vertical-align: middle;">
+                        <input type="checkbox" name="is_active"
+                            onchange="this.form.submit()" {% if device.Is_Active %}checked{% endif %}>
+                        <span class="slider round"></span>
+                    </label>
+                </form>
+            </td>
+        </tr>
+    </table>
+
+    <h4> Create At: {{ device.Created_At }} </h4>
+    <br>
+    <form class="register" method="post" action="{% url 'delete_device' device.id %}">
+        {% csrf_token %}
+        <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+{% endif %}
+
+
+{% endblock %}
