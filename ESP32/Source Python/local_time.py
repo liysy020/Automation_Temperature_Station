@@ -6,7 +6,18 @@ class local_time:
         self.Time_Offset = offset
         self.DLS_Start_Month, self.DLS_Start_Day = dls_start if dls_start else (0, 0)
         self.DLS_End_Month, self.DLS_End_Day = dls_end if dls_end else (0, 0)
-        
+        self.synced = False
+        self.sync_time() #inital system time to sync with Internet
+
+    def sync_time(self):
+        if not self.synced:
+            try:
+                ntptime.settime()
+                self.synced = True
+            except Exception as e:
+                print("NTP sync failed:", e)
+                self.synced = False
+    
     def is_dst(self, t):
         year = t[0]
         month = t[1]
@@ -33,27 +44,29 @@ class local_time:
             return False
 
     def get_time(self):
+        if not self.synced:
+            self.sync_time()
         try:
-            ntptime.settime()
-        except:
-            print("Failed to sync time")
+            t = time.localtime()
+            # offset for timezone
+            offset = self.Time_Offset * 3600
+            # offset for Day Light Saving
+            if self.DLS_Start_Month !=0 and self.DLS_End_Month !=0:
+                if self.is_dst(t):
+                    offset += 3600  # Add 1 hour for DST
+
+            local_time = time.localtime(time.mktime(t) + offset)
+            return local_time
+        except Exception as e:
+            print('Failed to get system time due to time sync issue')
             return None
-
-        t = time.localtime()
-        # offset for timezone
-        offset = self.Time_Offset * 3600
-        # offset for Day Light Saving
-        if self.DLS_Start_Month !=0 and self.DLS_End_Month !=0:
-            if self.is_dst(t):
-                offset += 3600  # Add 1 hour for DST
-
-        local_time = time.localtime(time.mktime(t) + offset)
-        return local_time
 
     def get_display_time(self):
         MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
         t= self.get_time()
+        if not t:
+            return 'Time Error'
         hour = t[3]
         minute = t[4]
         day = t[2]

@@ -46,21 +46,23 @@ LCD = LCD_Display(SDA_PIN,SCL_PIN)
 #Inital temperature sensor DS18B20
 temp_sensor = sensor(TEMP_PIN)
 
-while_loop_counter = 0 #data will send to server every 2 mins while display refresh every 10 sec
+while_loop_counter = 12 #data will send to server every 2 mins while display refresh every 10 sec
 while True:
-    time_string = localtime.get_display_time()
-    hour = localtime.get_time()[3]
-    temp= temp_sensor.read()
-    if 22 <= hour or hour < 6: #Switch off the backlight between 10pm to 6am
-        LCD.display(time_string, "Temp:  "+str(temp), False)
-    else:
-        LCD.display(time_string, "Temp:  "+str(temp), True)
     try:
-        while_loop_counter += 1
-        if while_loop_counter == 12:
+        while_loop_counter = while_loop_counter -1
+        temp= temp_sensor.read()
+        time_string = localtime.get_display_time()
+        t = localtime.get_time()
+        if t:
+            hour = t[3]
+            if hour >= 22 or hour < 6: #Switch off the backlight between 10pm to 6am
+                LCD.display(time_string, "Temp:  "+str(temp), False)
+            else:
+                LCD.display(time_string, "Temp:  "+str(temp), True)
+        if while_loop_counter <= 0: 
             send (host, port, path, DEVICE_NAME, API_KEY, temp)
-            while_loop_counter = 0
+            while_loop_counter = 12 # reset the counter
     except Exception as e:
         print (str(e))
-        pass
+        continue
     time.sleep(10)
