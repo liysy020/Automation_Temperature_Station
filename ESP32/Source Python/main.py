@@ -5,12 +5,12 @@ from local_time import local_time
 from display_LCD1602 import LCD_Display
 from sensor_DS18B20 import sensor
 #Wifi detail
-SSID = 'Express'
-PASSWORD = 'enoZsserpxE'
+SSID = ''
+PASSWORD = ''
 #server deatil
-host = '10.1.1.9'
-DEVICE_NAME = 'test_sensor'
-API_KEY = '7b0dfe2abd683316672c33c89b7ecf234a13f53632f3c0aa1ac656c7e5956a30'
+host = ''
+DEVICE_NAME = ''
+API_KEY = ''
 port = 8000
 path = "/api/temperature/"
 
