@@ -78,38 +78,29 @@ def toggle_device_status(request, id):
 @csrf_exempt
 def receive_temperature(request):
     if request.method != "POST":
-        #return HttpResponseBadRequest("Only POST allowed")
+        return HttpResponseBadRequest("Only POST allowed")
         return
     Name = request.headers.get("Device-Name")
     Api_Key = request.headers.get("Api-Key")
 
     if not Name or not Api_Key:
-        #return JsonResponse({"error": "Missing headers"}, status=400)
+        return JsonResponse({"error": "Missing headers"}, status=400)
         return
     try:
         Sensor = Device.objects.get(Name=Name, Api_Key=Api_Key, Is_Active=True)
     except Exception as e:
-        #return JsonResponse({"error": "Unauthorized"}, status=401)
+        return JsonResponse({"error": "Unauthorized"}, status=401)
         pass
-
     try:
-        if 'Temperature' in Sensor.Device_Type:
-            Data = json.loads(request.body)
-            Temp = Data.get("temperature")
-            Record = DeviceData(Sensor = Sensor, Temp = Temp, Humi = 0)
-            Record.save()
-        elif 'Humility' in Sensor.Device_Type:
-            Data = json.loads(request.body)
-            Humi = Data.get('humility')
-            Record = DeviceData(Sensor = Sensor, Temp = 0, Humi = Humi)
-            Record.save()
-        elif 'Hygrometer' in Sensor.Device_Type:
-            Data = json.loads(request.body)
-            Temp = Data.get("temperature")
-            Humi = Data.get('humility')
+        Data = json.loads(request.body)
+        Temp = Data.get("temperature")
+        Humi = Data.get('humility')
+        if Temp == 0 and Humi == 0: #both values are 0 indicated the Sensor is trying to setup itself 
+            return JsonResponse({'status': 'ok', 'sensor-type': Sensor.Device_Type}) #return the device type to sensor
+        else:
             Record = DeviceData(Sensor = Sensor, Temp = Temp, Humi = Humi)
             Record.save()
-        return JsonResponse({"status": "ok"})
+        return JsonResponse({'status': 'ok'})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
