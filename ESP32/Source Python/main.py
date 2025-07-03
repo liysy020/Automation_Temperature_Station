@@ -68,7 +68,7 @@ try:
                 sensor = sensors.sensor_ds18x20(TEMP_PIN)
             SENSOR_READY = True
 except Exception as e:
-    print ('failed to setup sensor type'+str(e))
+    print ('Failed to setup sensor type or server is not available'+str(e))
     SENSOR_READY = False
 
 while_loop_counter = 12 #data will send to server every 2 mins while display refresh every 10 sec
