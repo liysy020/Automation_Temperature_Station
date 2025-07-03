@@ -6,9 +6,9 @@ import json
 def https_post(host, port, path, headers, data):
     addr_info = socket.getaddrinfo(host, port)[0][-1]
     sock = socket.socket()
+    sock.settimeout(10) # 10 second timout for reads
     sock.connect(addr_info)
     sock = ssl.wrap_socket(sock, server_hostname=host)
-
     payload = json.dumps(data)
     payload_bytes = payload.encode('utf-8')
     header_lines = [
@@ -27,15 +27,28 @@ def https_post(host, port, path, headers, data):
     ]
     request = "\r\n".join(request_lines).encode('utf-8') + payload_bytes
     sock.write(request)
-    sock.close()
+    
+    try:
+        response = b""
+        while True:
+            line = sock.readline()
+            if not line:
+                break
+            response += line
+    except Exception as e:
+        print("Socket timeout or error:", e)
+    finally:
+        sock.close()
+    return response
 
-def send (host, port, path, DEVICE_NAME, API_KEY, temp):
+def send (host, port, path, DEVICE_NAME, API_KEY, temp=0, humi=0):
     data = {
-        "temperature": temp
+        "temperature": temp,
+        "humility": humi
     }
     headers = {
         "Device-Name": DEVICE_NAME,
         "Api-Key": API_KEY
     }
-    https_post(host, port, path, headers, data)
+    return https_post(host, port, path, headers, data)
 
