@@ -8,12 +8,17 @@ from datetime import timedelta
 from django.db.models import Avg
 import json, ipcalc
 
-def local(ip='0'): #bypass authentication if request is from local network
+def local(request): #bypass authentication if request is from local network
     localnetwork = ['10.0.0.0/8','172.16.0.0/12','192.168.0.0/16']
-    if ip != '0':
-        for subnet in localnetwork:
-            if ip in ipcalc.Network(subnet):
-                return True
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR") # get original IP if running Nginx as reverse proxy
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0].strip()  
+    else:
+        ip = request.META.get("REMOTE_ADDR") # get IP if running Django as web server
+    for subnet in localnetwork:
+        if ip in ipcalc.Network(subnet):
+            return True
+    return False
 
 def list_device(request,id=0):
     if request.user.is_authenticated != True:
@@ -106,7 +111,7 @@ def receive_temperature(request):
 
 def display_current(request):
     if request.user.is_authenticated != True:
-        if not local(request.META.get('REMOTE_ADDR')):
+        if not local(request):
             return redirect ('/login/?next=/display_current')
     sensor_data=[]
     if request.method == 'GET':
