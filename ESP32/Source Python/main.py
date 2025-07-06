@@ -66,9 +66,11 @@ try:
             
             if 'Temperature' in body_json.get("sensor-type"):
                 sensor = sensors.sensor_ds18x20(TEMP_PIN)
+            elif 'Humility' in body_json.get("sensor-type") and 'DHT11' in body_json.get("sensor-type"):
+                sensor = sensors.sensor_dht11(TEMP_PIN)
             SENSOR_READY = True
 except Exception as e:
-    print ('Failed to setup sensor type or server is not available'+str(e))
+    print ('Failed to setup sensor type or server is not available '+str(e))
     SENSOR_READY = False
 
 while_loop_counter = 12 #data will send to server every 2 mins while display refresh every 10 sec
@@ -76,19 +78,33 @@ while True:
     try:
         while_loop_counter = while_loop_counter -1
         str_temp = ''
+        str_humi = ''
         temp = 0
         humi = 0
         if SENSOR_READY:
-            temp = sensor.read()
-            str_temp= str(temp)
+            data = sensor.read()
+            print(data)
+            try:
+                temp, humi = data
+            except:
+                temp = data
+            str_temp = str(temp)
+            str_humi = str(humi)
+        
         time_string = localtime.get_display_time()
         t = localtime.get_time()
-        if t:
+        if t and LCD.lcd != None:
             hour = t[3]
             if hour >= 22 or hour < 6: #Switch off the backlight between 10pm to 6am
-                LCD.display(time_string, "Temp:  "+str_temp, False)
+                if str_humi == '0':
+                    LCD.display(time_string, "Temp:  "+str_temp+"°C", False)
+                else:
+                    LCD.display(time_string, "T:"+str_temp+"°C H:"+str_humi+"%", False)
             else:
-                LCD.display(time_string, "Temp:  "+str_temp, True)
+                if str_humi == '0':
+                    LCD.display(time_string, "Temp:  "+str_temp+"°C", True)
+                else:
+                    LCD.display(time_string, "T:"+str_temp+"°C H:"+str_humi+"%", True)
         if while_loop_counter <= 0 and HOST_READY:
             send (host=host, port=port, path=path, DEVICE_NAME=DEVICE_NAME, API_KEY=API_KEY, temp=temp, humi=humi)
             while_loop_counter = 12 # reset the counter

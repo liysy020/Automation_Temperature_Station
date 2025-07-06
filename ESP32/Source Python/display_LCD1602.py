@@ -5,7 +5,11 @@ from lib.i2c_lcd import I2cLcd
 class LCD_Display:
     def __init__(self, sda_pin, scl_pin):
         self.i2c = I2C(0, sda=Pin(sda_pin), scl=Pin(scl_pin), freq=400000)
-        self.lcd = I2cLcd(self.i2c, 0x27, 2, 16)
+        devices = self.i2c.scan()
+        if 0x27 not in devices:
+            self.lcd = None  # No LCD found
+        else:
+            self.lcd = I2cLcd(self.i2c, 0x27, 2, 16)
         
     def display(self, line1, line2):
         #display row 1

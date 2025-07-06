@@ -14,3 +14,35 @@ class sensor_ds18x20:
         for rom in self.roms:
             return round(self.ds.read_temp(rom), 1)
 
+import dht
+from machine import Pin
+class sensor_dht11:
+    def __init__(self, pin):
+        self.sensor = dht.DHT11(Pin(pin))
+
+    def read(self, retries=3):
+        for _ in range(retries):
+            try:
+                self.sensor.measure()
+                temp = self.sensor.temperature()
+                humi = self.sensor.humidity()
+                return round(temp, 1), round(humi, 1)
+            except OSError:
+                pass
+        return None
+        
+class sensor_dht22:
+    def __init__(self, pin):
+        self.sensor = dht.DHT22(Pin(pin))
+
+    def read(self, retries=3):
+        for _ in range(retries):
+            try:
+                self.sensor.measure()
+                temp = self.sensor.temperature()
+                humi = self.sensor.humidity()
+                return round(temp, 1), round(humi, 1)
+            except OSError:
+                pass
+        return None
+        
