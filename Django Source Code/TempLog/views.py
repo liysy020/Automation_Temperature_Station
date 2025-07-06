@@ -91,12 +91,12 @@ def receive_temperature(request):
     if not Name or not Api_Key:
         return JsonResponse({"error": "Missing headers"}, status=400)
         return
-    try:
+    try: # confirm if Device Name and API Key are matching with DB
         Sensor = Device.objects.get(Name=Name, Api_Key=Api_Key, Is_Active=True)
     except Exception as e:
         return JsonResponse({"error": "Unauthorized"}, status=401)
         pass
-    try:
+    try: # if the API call is the first call both Temp and Humi should be 0 otherwise it's trying to update data to the server
         Data = json.loads(request.body)
         Temp = Data.get("temperature")
         Humi = Data.get('humility')
@@ -117,29 +117,14 @@ def display_current(request):
     if request.method == 'GET':
         five_minutes_ago = timezone.now() - timedelta(minutes=5)
         for sensor in Device.objects.filter(Is_Active = True):
-            if 'Temperature' in sensor.Device_Type:
-                current_temp = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_temp=Avg('Temp'))['avg_temp']
-                if current_temp != None:
-                    sensor_data.append([sensor.Name, f"{float(current_temp):.1f}", '0'])
-                else:
-                    sensor_data.append([sensor.Name, '0', '0'])
-            elif 'Humility' in sensor.Device_Type:
-                current_humi = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_humi=Avg('Humi'))['avg_humi']
-                if current_humi != None:
-                    sensor_data.append([sensor.Name, '0', f"{float(current_humi):.1f}"])
-                else:
-                    sensor_data.append([sensor.Name, '0', '0']) 
-            elif 'Hygrometer' in sensor.Device_Type:
-                current_temp = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_temp=Avg('Temp'))['avg_temp']
-                current_humi = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_humi=Avg('Humi'))['avg_humi']
-                if current_temp !=None and current_humi != None:
-                    ensor_data.append([sensor.Name, f"{float(current_temp):.1f}", f"{float(current_humi):.1f}"])
-                elif current_temp !=None and current_humi == None:
-                    sensor_data.append([sensor.Name, f"{float(current_temp):.1f}", '0'])
-                elif current_temp ==None and current_humi != None:
-                    sensor_data.append([sensor.Name, '0', f"{float(current_humi):.1f}"])
-                else:
-                    sensor_data.append([sensor.Name, '0', '0'])
+            current_temp = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_temp=Avg('Temp'))['avg_temp']
+            current_humi = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_humi=Avg('Humi'))['avg_humi']
+            if current_temp !=None and current_humi != None:
+                sensor_data.append([sensor.Name, f"{float(current_temp):.1f}", f"{float(current_humi):.1f}"])
+            elif current_temp !=None and current_humi == None:
+                sensor_data.append([sensor.Name, f"{float(current_temp):.1f}", '0'])
+            elif current_temp ==None and current_humi != None:
+                sensor_data.append([sensor.Name, '0', f"{float(current_humi):.1f}"])
+            else:
+                sensor_data.append([sensor.Name, '0', '0'])
     return render (request, 'temperature.html',{'data': sensor_data, 'time':timezone.localtime(timezone.now())})
-
-                

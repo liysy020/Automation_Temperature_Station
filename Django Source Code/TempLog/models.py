@@ -7,8 +7,8 @@ def generate_api_key():
 class Device(models.Model):
     DEVICE_CHOICES = [
         ('Temperature Sensor', 'Temperature Sensor'),
-        ('Humility Sensor','Humility Sensor'),
-        ('Hygrometer Sensor','Hygrometer Sensor')
+        ('Humility DHT11','Humility DHT11'),
+        ('Humility DHT22','Humility DHT22'),
     ]
     id = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=50, unique=True)

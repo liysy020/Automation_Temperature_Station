@@ -5,8 +5,8 @@ class SearchDevice(forms.Form):
     DEVICE_CHOICES = [
         ('All', 'All'),
         ('Temperature Sensor', 'Temperature Sensor'),
-        ('Humility Sensor','Humility Sensor'),
-        ('Hygrometer Sensor','Hygrometer Sensor')
+        ('Humility DHT11','Humility DHT11'),
+        ('Humility DHT22','Humility DHT22'),
     ]
     STATUS_CHOICES = [
         ('---', '---'),
