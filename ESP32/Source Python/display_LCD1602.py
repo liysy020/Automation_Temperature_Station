@@ -13,10 +13,11 @@ class LCD_Display:
             self.lcd = None  # No LCD initialized due to pin error
         
     def display(self, line1, line2):
-        #display row 1
-        self.lcd.move_to(0, 0)
-        self.lcd.putstr (line1)
-        #display row 2
-        self.lcd.move_to(0, 1)
-        self.lcd.putstr (line2)
+        if self.lcd !=None:
+            #display row 1
+            self.lcd.move_to(0, 0)
+            self.lcd.putstr (line1)
+            #display row 2
+            self.lcd.move_to(0, 1)
+            self.lcd.putstr (line2)
 
