@@ -85,28 +85,30 @@ while True:
         humi = 0
         if SENSOR_READY:
             data = sensor.read()
-            print(data)
+            print('senor readings: ' + str(data))
             try:
-                temp, humi = data
+                if data:
+                    temp, humi = data
             except:
-                temp = data
+                if data:
+                    temp = data
             str_temp = str(temp)
             str_humi = str(humi)
-        
+            
         time_string = localtime.get_display_time()
         t = localtime.get_time()
         if t and LCD.lcd != None:
             hour = t[3]
             if hour >= 22 or hour < 6: #Switch off the backlight between 10pm to 6am
                 if str_humi == '0':
-                    LCD.display(time_string, "Temp:  "+str_temp+"°C", False)
+                    LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+"°C", backlight = False)
                 else:
-                    LCD.display(time_string, "T:"+str_temp+"°C H:"+str_humi+"%", False)
+                    LCD.display(line1 = time_string, line2 = "T:"+str_temp+"°C H:"+str_humi+"%", backlight = False)
             else:
                 if str_humi == '0':
-                    LCD.display(time_string, "Temp:  "+str_temp+"°C", True)
+                    LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+ "°C")
                 else:
-                    LCD.display(time_string, "T:"+str_temp+"°C H:"+str_humi+"%", True)
+                    LCD.display(line1 = time_string, line2 = "T:"+str_temp+"°C H:"+str_humi+"%")
         if while_loop_counter <= 0 and HOST_READY:
             send (host=host, port=port, path=path, DEVICE_NAME=DEVICE_NAME, API_KEY=API_KEY, temp=temp, humi=humi)
             while_loop_counter = 12 # reset the counter
