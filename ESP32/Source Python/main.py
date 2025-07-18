@@ -68,6 +68,8 @@ try:
                 sensor = sensors.sensor_ds18x20(TEMP_PIN)
             elif 'Humility' in body_json.get("sensor-type") and 'DHT11' in body_json.get("sensor-type"):
                 sensor = sensors.sensor_dht11(TEMP_PIN)
+            elif 'Humility' in body_json.get("sensor-type") and 'DHT22' in body_json.get("sensor-type"):
+                sensor = sensors.sensor_dht22(TEMP_PIN)
             SENSOR_READY = True
 except Exception as e:
     print ('Failed to setup sensor type or server is not available '+str(e))
