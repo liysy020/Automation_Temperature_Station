@@ -4,8 +4,13 @@ from lib.i2c_lcd import I2cLcd
 
 class LCD_Display:
     def __init__(self, sda_pin, scl_pin):
-        self.i2c = I2C(0, sda=Pin(sda_pin), scl=Pin(scl_pin), freq=100_000)
-        self.lcd = I2cLcd(self.i2c, 0x27, 2, 16)
+        try:
+            self.i2c = I2C(0, sda=Pin(sda_pin), scl=Pin(scl_pin), freq=100_000)
+            devices = self.i2c.scan()
+            self.lcd = I2cLcd(self.i2c, 0x27, 2, 16)
+        except Exception as e:
+            print("Invalid SDA or SCL pin:", e)
+            self.lcd = None  # No LCD initialized due to pin error
         
     def display(self, line1, line2, backlight=True):
         if backlight:
