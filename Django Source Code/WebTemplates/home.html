@@ -13,7 +13,7 @@
 
 <div class="container">
   <div class="row title" style = "background-image: url({%static 'css/Images/header-logo.png' %}); background-repeat:no-repeat;background-position: top left; background-size: 180px 180px;">
-    <h1 style="text-align:right"> Temperature Monitor</h1>
+    <h1 style="text-align:right"> Temperature Station</h1>
       <div id="user_auth" class="text-right">
       {% if user_auth %}
         <a class="btn btn-primary" href = "/logout/?next=/">Logout</a>
@@ -27,9 +27,11 @@
         <div class="list-opt-title">
               <label class="list-opt-a" >Settings</label>
               <div class="list-sub-opt"><a class="list-opt-a" href="/admin/password_change">Change Password</a></div>
+              <div class="list-sub-opt"><a class="list-opt-a" href="/system">System On Off</a></div>
+              <div class="list-sub-opt"><a class="list-opt-a" href="/smtp_setting">SMTP Settings</a></div>
+              <div class="list-sub-opt"><a class="list-opt-a" href="/view_recipients">Notification Recipients</a></div>
               <div class="list-sub-opt"><a class="list-opt-a" href="/device">Device and Sensor</a></div>
-              <div class="list-sub-opt"><a class="list-opt-a" href="/display_current">Temperture and Humility</a></div>
-              <!-- <div class="list-sub-opt"><a class="list-opt-a" href="/view_recipients">Notification Recipients</a></div> -->
+              <div class="list-sub-opt"><a class="list-opt-a" href="/display_current">Temperture and Humidity</a></div>
         </div>
         <!-- <div class="list-opt-title">
             <label class="list-opt-a" >Logging System</label>

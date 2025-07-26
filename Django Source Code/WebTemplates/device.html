@@ -63,6 +63,12 @@
 {% if device %}
     <h4> Device Name: {{ device.Name }}</h4>
     <h4> Device Type: {{ device.Device_Type }}</h4>
+    {% if device.T_Comfort_Low != device.T_Comfort_High %}
+        <h4> Comfort Temperature set: from {{ device.T_Comfort_Low }} to {{ device.T_Comfort_High }} or notification will send out!</h4>
+    {% endif %}
+    {% if device.H_Comfort_Low != device.H_Comfort_High %}
+        <h4> Comfort Humidity set from {{ device.H_Comfort_Low }} to {{ device.H_Comfort_High }} or notification will send out!</h4>
+    {% endif %}
     <h4> API Key: {{ device.Api_Key }}</h4>
     <table>
         <tr>
@@ -80,13 +86,22 @@
         </tr>
     </table>
 
-    <h4> Create At: {{ device.Created_At }} </h4>
-    <br>
+    <h4> Last update: {{ device.Created_At }} </h4>
+    <br> <a class="btn btn-primary" href="{% url 'update_device' device.id %}">Change</a> <br>
     <form class="register" method="post" action="{% url 'delete_device' device.id %}">
         {% csrf_token %}
         <button class="btn btn-danger" type="submit">Delete</button>
     </form>
 {% endif %}
 
+{% if update %}
+    <form class="register" method="post">
+        <br>
+        {% csrf_token %}
+        {{ update.as_p }}
+        <br>
+        <button class="btn btn-primary" type="submit">Save</button>
+    </form>
+{% endif %}
 
 {% endblock %}
