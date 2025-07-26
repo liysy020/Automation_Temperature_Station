@@ -17,8 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from Login.views import login_request as login, logout_request as logout
-from TempLog.views import list_device, register_device, delete_device, toggle_device_status, receive_temperature, display_current
-
+from TempLog.views import list_device, register_device, delete_device, update_device, toggle_device_status, receive_temperature, display_current
+from TempLog.views import list_recipient, add_recipient, remove_recipient, smtp_setting, system_on_off
 urlpatterns = [
     path('admin/', admin.site.urls),
     path ('', display_current, name = 'display_current'),
@@ -28,7 +28,16 @@ urlpatterns = [
     path ('device/<int:id>', list_device, name = 'list_device_id'),
     path ('delete_device/<int:id>', delete_device, name = 'delete_device'),
     path ('device/<int:id>/toggle/', toggle_device_status, name='toggle_device_status'),
+    path ('update_device/<int:id>', update_device, name = 'update_device'),
     path ('register_device/', register_device, name = 'register_device'),
     path ('api/temperature/', receive_temperature, name = 'receive_temperature'),
     path ('display_current/', display_current, name = 'display_current'),
+    path ('view_recipients/', list_recipient, name = 'list_recipient'),
+    path ('add_recipient/', add_recipient, name = 'add_recipient'),
+    path ('view_recipients/<int:pk>', list_recipient, name = 'list_recipient_pk'),
+    path ('remove_recipient/<int:pk>', remove_recipient, name = 'remove_recipient_pk'),
+    path ('smtp_setting/', smtp_setting, name = 'smtp_setting'),
+    path ('smtp_setting/<int:pk>', smtp_setting, name = 'update_smtp_setting_pk'),
+    path ('system/', system_on_off, name = 'system'),
+    path ('system/<str:action>', system_on_off, name = 'system_on_off'),
 ]

@@ -20,13 +20,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@a_y(^%2cvy$#cdd%d+pej@)+3#p(-*-72&mk8adfadse'
+SECRET_KEY = 'django-insecure-@as234sdiwevy$#c%d+pej@)+3#p(-*-72&mk8!tb9qb33e+ze'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-
+#additional host from reverse proxy server
 ALLOWED_HOSTS = []
-
+#additional URL from reverse proxy server
 CSRF_TRUSTED_ORIGINS = []
 # Application definition
 
@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'sslserver',
     'Login',
     'TempLog',
 ]
@@ -125,6 +124,13 @@ MEDIA_URL = '/files/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'example.com'
+EMAIL_USE_TLS = False
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'lab@example.com'
+EMAIL_HOST_PASSWORD = ''
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SESSION_COOKIE_AGE = 8*60*60
@@ -148,7 +154,7 @@ if DEBUG: #turn on debug
                 'handlers': ['file'],
                 'propagate': True,
             },
-            'api_log': {
+            'apscheduler': {
                 'level': 'DEBUG',
                 'handlers': ['file'],
                 'propagate': True,
@@ -170,7 +176,7 @@ else: #switch off debug
                 'level': 'CRITICAL',
                 'propagate': True,
             },
-            'api_log': {
+            'apscheduler': {
                 'handlers': ['null'],
                 'level': 'CRITICAL',
                 'propagate': True,
