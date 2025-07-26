@@ -44,7 +44,7 @@ def https_post(host, port, path, headers, data):
 def send (host, port, path, DEVICE_NAME, API_KEY, temp=0, humi=0):
     data = {
         "temperature": temp,
-        "humility": humi
+        "humidity": humi
     }
     headers = {
         "Device-Name": DEVICE_NAME,
