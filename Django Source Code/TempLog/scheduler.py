@@ -10,7 +10,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Avg
 
-x_month_logs = 4 # Keeping 4 months records
+x_month_logs = 12 # Keeping 12 months records
 logger = logging.getLogger('thermometer_log')
 
 jobstores = {'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')}
