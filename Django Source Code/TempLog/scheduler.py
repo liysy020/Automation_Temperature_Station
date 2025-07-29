@@ -10,7 +10,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Avg
 
-x_month_logs = 12 # Keeping 12 months records
+x_month_logs = 4 # Keeping 4 months records
 logger = logging.getLogger('thermometer_log')
 
 jobstores = {'default': SQLAlchemyJobStore(url='sqlite:///jobs.sqlite')}
@@ -31,150 +31,184 @@ def alerting():
     local_time = timezone.localtime(timezone.now())
     formatted_time = local_time.strftime('%Y-%m-%d %H:%M:%S')
     for sensor in Device.objects.filter(Is_Active = True):
-        if sensor.T_Comfort_Low != sensor.T_Comfort_High: # Temperature Comfert zone has set
-            current_temp = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_temp=Avg('Temp'))['avg_temp']
-            if current_temp < sensor.T_Comfort_Low: # Low temperature found
-                logger.debug ('Low temperature found on sensor '+ sensor.Name)
-                has_sent = False #assume notification has not sent
-                for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
-                    if 'Low temperature' in sent_notification.Message:
-                        has_sent = True
-                        break
-                if not has_sent:
-                    receipients = Recipient.objects.filter(
-                        Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
-                        ).values_list('Email', flat=True).distinct()
-                    if receipients:
-                        for receipient in receipients: # create records that notification will just send once per receipient
-                            user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
-                            new_notification = Notification(User=user, Sensor=sensor, Message = 'Low temperature detected!')
-                            new_notification.save()
-                        sent = send_notification (
-                            sub = 'Low temperature alert', 
-                            msg = 'Low temperature detected on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent temperature is ' + f"{current_temp:.1f}" +'°C', 
-                            receipients = receipients,
-                            )
-                        if sent:
-                            logger.debug ('Temperature notification email sent successfully!')
-                        else:
-                            logger.debug ('No Temperature notification!')
-            elif current_temp > sensor.T_Comfort_High: # High temperature found
-                logger.debug ('High temperature found on sensor '+ sensor.Name)
-                has_sent = False # assume notification has not sent
-                for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
-                    if 'High temperature' in sent_notification.Message:
-                        has_sent = True
-                        break
-                if not has_sent:
-                    receipients = Recipient.objects.filter(
-                        Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
-                        ).values_list('Email', flat=True).distinct()
-                    if receipients:
-                        for receipient in receipients: # create records that notification will just send once per receipient
-                            user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
-                            new_notification = Notification(User=user, Sensor=sensor, Message = 'High temperature detected!')
-                            new_notification.save()
-                        sent = send_notification (
-                            sub = 'High temperature alert', 
-                            msg = 'High temperature detected on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent temperature is ' + f"{current_temp:.1f}" +'°C', 
-                            receipients = receipients,
-                            )
-                        if sent:
-                            logger.debug ('Temperature notification email sent successfully!')
-                        else:
-                            logger.debug ('No Temperature notification!')
-            else: # clear alerts within comfort zone
-                for notification in Notification.objects.filter(Sensor__Name = sensor.Name):
-                    if 'Low temperature' in notification.Message:
-                        sent = send_notification (
-                            sub = 'Low temperature clear', 
-                            msg = 'Low temperature alert cleared on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent temperature is ' + f"{current_temp:.1f}" +'°C', 
-                            receipients = [notification.User.Email]
-                            )
-                        if sent:
-                            notification.delete()
-                            logger.debug ('Temp-Alert-Clear email sent successfully!')
-                    elif 'High temperature'in notification.Message:
-                        sent = send_notification (
-                            sub = 'High temperature clear', 
-                            msg = 'High temperature alert cleared on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent temperature is ' + f"{current_temp:.1f}" +'°C', 
-                            receipients = [notification.User.Email]
-                            )
-                        if sent:
-                            notification.delete()
-                            logger.debug ('Temp-Alert-Clear email sent successfully!')
-        if sensor.H_Comfort_Low != sensor.H_Comfort_High: #Humidity comfort zone has set
-            current_humi = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_humi=Avg('Humi'))['avg_humi']
-            if current_humi < sensor.H_Comfort_Low: # Low humidity found
-                logger.debug ('Low humidity found on sensor '+ sensor.Name)
-                has_sent = False #assume notification has not sent
-                for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
-                    if 'Low humidity' in sent_notification.Message:
-                        has_sent = True
-                        break
-                if not has_sent:
-                    receipients = Recipient.objects.filter(
-                        Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
-                        ).values_list('Email', flat=True).distinct()
-                    if receipients:
-                        for receipient in receipients: # create records that notification will just send once per receipient
-                            user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
-                            new_notification = Notification(User=user, Sensor=sensor, Message = 'Low humidity detected!')
-                            new_notification.save()
-                        sent = send_notification (
-                            sub = 'Low humidity alert', 
-                            msg = 'Low humidity detected on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent humidity is ' + f"{current_humi:.1f}" +'%', 
-                            receipients = receipients,
-                            )
-                        if sent:
-                            logger.debug ('Humidity notification email sent successfully!')
-                        else:
-                            logger.debug ('No notification!')
-            elif current_humi > sensor.H_Comfort_High: # High humidity found
-                logger.debug ('High humidity found on sensor '+ sensor.Name)
-                has_sent = False # assume notification has not sent
-                for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
-                    if 'High humidity' in sent_notification.Message:
-                        has_sent = True
-                        break
-                if not has_sent:
-                    receipients = Recipient.objects.filter(
-                        Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
-                        ).values_list('Email', flat=True).distinct()
-                    if receipients:
-                        for receipient in receipients: # create records that notification will just send once per receipient
-                            user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
-                            new_notification = Notification(User=user, Sensor=sensor, Message = 'High humidity detected!')
-                            new_notification.save()
-                        sent = send_notification (
-                            sub = 'High humidity alert', 
-                            msg = 'High humidity detected on sensor '+ sensor.Name + 'on '+ formatted_time + '\nCurrent humidity is ' + f"{current_humi:.1f}" +'%', 
-                            receipients = receipients,
-                            )
-                        if sent:
-                            logger.debug ('Humidity notification email sent successfully!')
-                        else:
-                            logger.debug ('No humidity notification!')
-            else: # clear alerts within comfort zone
-                for notification in Notification.objects.filter(Sensor__Name = sensor.Name):
-                    if 'Low humidity' in notification.Message:
-                        sent = send_notification (
-                            sub = 'Low humidity clear', 
-                            msg = 'Low humidity alert cleared on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent humidity is ' + f"{current_temp:.1f}" +'°C', 
-                            receipients = [notification.User.Email]
-                            )
-                        if sent:
-                            notification.delete()
-                            logger.debug ('Humi-Alert-Clear email sent successfully!')
-                    elif 'High humidity'in notification.Message:
-                        sent = send_notification (
-                            sub = 'High humidity clear', 
-                            msg = 'High humidity alert cleared on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent humidity is ' + f"{current_temp:.1f}" +'°C', 
-                            receipients = [notification.User.Email]
-                            )
-                        if sent:
-                            notification.delete()
-                            logger.debug ('Humi-Alert-Clear email sent successfully!')
+        if not DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).exists(): # no data received on the last 5 mins
+            has_sent = False # assume notification has not sent
+            for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
+                if 'Lost connection' in sent_notification.Message:
+                    has_sent = True
+                    break
+            if not has_sent:
+                receipients = Recipient.objects.filter(
+                    Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
+                    ).values_list('Email', flat=True).distinct()
+                if receipients:
+                    for receipient in receipients: # create records that notification will just send once per receipient
+                        user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
+                        new_notification = Notification(User=user, Sensor=sensor, Message = 'Lost connection detected!')
+                        new_notification.save()
+                    sent = send_notification (
+                        sub = 'Alert: Sensor lost connection to Internet', 
+                        msg = sensor.Name + ' sensor lost connection to Internet on '+ formatted_time, 
+                        receipients = receipients,
+                        )
+                    if sent:
+                        logger.debug ('Sensor connection lost email sent succesfully!')
+                    else:
+                        logger.debug ('Failed to send notification about sensor lost connection!')
+        else:
+            for lost_connection_notification in Notification.objects.filter(Sensor__Name = sensor.Name, Message__contains='Lost connection'): # clear alerts that connection restored
+                sent = send_notification (
+                    sub = 'Clear: Lost connection alert', 
+                    msg = 'Internet connection restored on sensor '+ sensor.Name + ' on '+ formatted_time, 
+                    receipients = [lost_connection_notification.User.Email]
+                    )
+                if sent:
+                    lost_connection_notification.delete()
+                    logger.debug ('Lost-Connection-Clear email sent successfully!')
+            if sensor.T_Comfort_Low != sensor.T_Comfort_High: # Temperature Comfert zone has set
+                current_temp = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_temp=Avg('Temp'))['avg_temp']
+                if current_temp < sensor.T_Comfort_Low: # Low temperature found
+                    logger.debug ('Low temperature found on sensor '+ sensor.Name)
+                    has_sent = False # assume notification has not sent
+                    for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
+                        if 'Low temperature' in sent_notification.Message:
+                            has_sent = True
+                            break
+                    if not has_sent:
+                        receipients = Recipient.objects.filter(
+                            Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
+                            ).values_list('Email', flat=True).distinct()
+                        if receipients:
+                            for receipient in receipients: # create records that notification will just send once per receipient
+                                user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
+                                new_notification = Notification(User=user, Sensor=sensor, Message = 'Low temperature detected!')
+                                new_notification.save()
+                            sent = send_notification (
+                                sub = 'Alert: Low temperature', 
+                                msg = 'Low temperature detected on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent temperature is ' + f"{current_temp:.1f}" +'°C', 
+                                receipients = receipients,
+                                )
+                            if sent:
+                                logger.debug ('Temperature notification email sent successfully!')
+                            else:
+                                logger.debug ('No Temperature notification!')
+                elif current_temp > sensor.T_Comfort_High: # High temperature found
+                    logger.debug ('High temperature found on sensor '+ sensor.Name)
+                    has_sent = False # assume notification has not sent
+                    for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
+                        if 'High temperature' in sent_notification.Message:
+                            has_sent = True
+                            break
+                    if not has_sent:
+                        receipients = Recipient.objects.filter(
+                            Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
+                            ).values_list('Email', flat=True).distinct()
+                        if receipients:
+                            for receipient in receipients: # create records that notification will just send once per receipient
+                                user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
+                                new_notification = Notification(User=user, Sensor=sensor, Message = 'High temperature detected!')
+                                new_notification.save()
+                            sent = send_notification (
+                                sub = 'Alert: High temperature', 
+                                msg = 'High temperature detected on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent temperature is ' + f"{current_temp:.1f}" +'°C', 
+                                receipients = receipients,
+                                )
+                            if sent:
+                                logger.debug ('Temperature notification email sent successfully!')
+                            else:
+                                logger.debug ('No Temperature notification!')
+                else: # clear alerts within comfort zone
+                    for notification in Notification.objects.filter(Sensor__Name = sensor.Name):
+                        if 'Low temperature' in notification.Message:
+                            sent = send_notification (
+                                sub = 'Clear: Low temperature alert', 
+                                msg = 'Low temperature alert cleared on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent temperature is ' + f"{current_temp:.1f}" +'°C', 
+                                receipients = [notification.User.Email]
+                                )
+                            if sent:
+                                notification.delete()
+                                logger.debug ('Temp-Alert-Clear email sent successfully!')
+                        elif 'High temperature'in notification.Message:
+                            sent = send_notification (
+                                sub = 'Clear: High temperature alert', 
+                                msg = 'High temperature alert cleared on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent temperature is ' + f"{current_temp:.1f}" +'°C', 
+                                receipients = [notification.User.Email]
+                                )
+                            if sent:
+                                notification.delete()
+                                logger.debug ('Temp-Alert-Clear email sent successfully!')
+            if sensor.H_Comfort_Low != sensor.H_Comfort_High: #Humidity comfort zone has set
+                current_humi = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_humi=Avg('Humi'))['avg_humi']
+                if current_humi < sensor.H_Comfort_Low: # Low humidity found
+                    logger.debug ('Low humidity found on sensor '+ sensor.Name)
+                    has_sent = False #assume notification has not sent
+                    for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
+                        if 'Low humidity' in sent_notification.Message:
+                            has_sent = True
+                            break
+                    if not has_sent:
+                        receipients = Recipient.objects.filter(
+                            Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
+                            ).values_list('Email', flat=True).distinct()
+                        if receipients:
+                            for receipient in receipients: # create records that notification will just send once per receipient
+                                user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
+                                new_notification = Notification(User=user, Sensor=sensor, Message = 'Low humidity detected!')
+                                new_notification.save()
+                            sent = send_notification (
+                                sub = 'Alert: Low humidity', 
+                                msg = 'Low humidity detected on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent humidity is ' + f"{current_humi:.1f}" +'%', 
+                                receipients = receipients,
+                                )
+                            if sent:
+                                logger.debug ('Humidity notification email sent successfully!')
+                            else:
+                                logger.debug ('No notification!')
+                elif current_humi > sensor.H_Comfort_High: # High humidity found
+                    logger.debug ('High humidity found on sensor '+ sensor.Name)
+                    has_sent = False # assume notification has not sent
+                    for sent_notification in Notification.objects.filter(Sensor__Name = sensor.Name): #fletch notification database to confirm
+                        if 'High humidity' in sent_notification.Message:
+                            has_sent = True
+                            break
+                    if not has_sent:
+                        receipients = Recipient.objects.filter(
+                            Q(Sensor__Name = sensor.Name) | Q(Sensor__Name = 'All')
+                            ).values_list('Email', flat=True).distinct()
+                        if receipients:
+                            for receipient in receipients: # create records that notification will just send once per receipient
+                                user = (Recipient.objects.filter(Email=receipient, Sensor=sensor).first() or Recipient.objects.filter(Email=receipient, Sensor__Name='All').first())
+                                new_notification = Notification(User=user, Sensor=sensor, Message = 'High humidity detected!')
+                                new_notification.save()
+                            sent = send_notification (
+                                sub = 'Alert: High humidity', 
+                                msg = 'High humidity detected on sensor '+ sensor.Name + 'on '+ formatted_time + '\nCurrent humidity is ' + f"{current_humi:.1f}" +'%', 
+                                receipients = receipients,
+                                )
+                            if sent:
+                                logger.debug ('Humidity notification email sent successfully!')
+                            else:
+                                logger.debug ('No humidity notification!')
+                else: # clear alerts within comfort zone
+                    for notification in Notification.objects.filter(Sensor__Name = sensor.Name):
+                        if 'Low humidity' in notification.Message:
+                            sent = send_notification (
+                                sub = 'Clear: Low humidity alert', 
+                                msg = 'Low humidity alert cleared on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent humidity is ' + f"{current_temp:.1f}" +'°C', 
+                                receipients = [notification.User.Email]
+                                )
+                            if sent:
+                                notification.delete()
+                                logger.debug ('Humi-Alert-Clear email sent successfully!')
+                        elif 'High humidity'in notification.Message:
+                            sent = send_notification (
+                                sub = 'Clear: High humidity alert', 
+                                msg = 'High humidity alert cleared on sensor '+ sensor.Name + ' on '+ formatted_time + '\nCurrent humidity is ' + f"{current_temp:.1f}" +'°C', 
+                                receipients = [notification.User.Email]
+                                )
+                            if sent:
+                                notification.delete()
+                                logger.debug ('Humi-Alert-Clear email sent successfully!')
 def delete_old_logs():
     try:
         months_ago = timezone.now() - timedelta(days=x_month_logs * 30)
