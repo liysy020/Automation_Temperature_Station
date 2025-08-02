@@ -3,6 +3,7 @@ from upload import send
 from local_time import local_time
 from display_LCD1602 import LCD_Display
 import sensors
+from machine import Pin
 
 #Day Light Saving setting
 DLS_Start_Month = 10 #Oct
@@ -22,10 +23,28 @@ SCL_PIN = 22
 LCD = LCD_Display(SDA_PIN,SCL_PIN)
 
 #Temperature Sensor PIN number
-TEMP_PIN = 2
+TEMP_PIN = 23
 #Inital temperature sensor DS18B20
 SENSOR_READY = False
 
+# PLC application PIN. Set to 0 will disable power trigging function
+# The PIN number that connected to an application. It will be power on when low temperature triggered
+SW1_PIN = 0
+switch1 = Pin(SW1_PIN, Pin.OUT) if SW1_PIN !=0 else None
+# The PIN number that connected to an application. It will be power on when high temperature triggered
+SW2_PIN = 0
+switch2 = Pin(SW2_PIN, Pin.OUT) if SW2_PIN !=0 else None
+# The PIN number that connected to an application. It will be power on when low humidity triggered
+SW3_PIN = 0
+switch3 = Pin(SW3_PIN, Pin.OUT) if SW3_PIN !=0 else None
+# The PIN number that connected to an application. It will be power on when high humidity triggered
+SW4_PIN = 13
+switch4 = Pin(SW4_PIN, Pin.OUT) if SW4_PIN !=0 else None
+# Application trigger condtion. Value will be assign by initiating connection to server 
+T_Low = None
+T_High = None
+H_Low = None
+H_High = None
 
 #setup server detail
 CONFIG_FILE = "initial.conf"
@@ -50,7 +69,7 @@ except Exception as e:
     HOST_READY = False
 
 #setup sensor type by sending temp=0 and hum=0 to the server
-#sever will respond with value of sensor-type
+#server will respond with value of sensor-type and PLC power trigger value
 try:
     if not HOST_READY:
         SENSOR_READY = False
@@ -71,6 +90,18 @@ try:
             elif 'Humidity' in body_json.get("sensor-type") and 'DHT22' in body_json.get("sensor-type"):
                 sensor = sensors.sensor_dht22(TEMP_PIN)
             SENSOR_READY = True
+
+            T_Low = body_json.get("T_Low")
+            T_High = body_json.get("T_High")
+            H_Low = body_json.get("H_Low")
+            H_High = body_json.get("H_High")
+            
+            if T_Low == 0 and T_High == 0:
+                T_Low = None
+                T_High = None
+            if H_Low == 0 and H_High == 0:
+                H_Low = None
+                H_High = None
 except Exception as e:
     print ('Failed to setup sensor type or server is not available '+str(e))
     SENSOR_READY = False
@@ -83,7 +114,7 @@ while True:
         str_humi = ''
         temp = 0
         humi = 0
-        if SENSOR_READY:
+        if SENSOR_READY: # read sensor information
             data = sensor.read()
             print('senor readings: ' + str(data))
             try:
@@ -94,10 +125,38 @@ while True:
                     temp = data
             str_temp = str(temp)
             str_humi = str(humi)
-            
+            if switch1 and T_Low:
+                if temp <= float(T_Low): # Low temperature alert triggers switch 1 to power on
+                    switch1.value(1)
+                    print ('Low temperature trigger switch1 to power on')
+                else:
+                    switch1.value(0)
+                    print ('switch 1 power off')
+            if switch2 and T_High:
+                if temp >= float(T_High): # High temperature alert trigger switch 2 to power on
+                    switch2.value(1)
+                    print ('High temperature trigger switch2 to power on')
+                else:
+                    switch2.value(0)
+                    print ('switch 2 power off')
+            if switch3 and H_Low:
+                if humi <= float(H_Low): # Low Humidity alert trigger switch 3 to power on
+                    switch3.value(1)
+                    print ('Low Humidity trigger switch3 to power on')
+                else:
+                    switch3.value(0)
+                    print ('switch 3 power off')
+            if switch4 and H_High:
+                if humi >= float(H_High): # High Humidity alert trigger switch4 to power on
+                    switch4.value(1)
+                    print ('High Humidity trigger switch4 to power on')
+                else:
+                    switch4.value(0)
+                    print ('swtich 4 power off')
+                
         time_string = localtime.get_display_time()
         t = localtime.get_time()
-        if t and LCD.lcd != None:
+        if t and LCD.lcd != None: # LCD attached
             hour = t[3]
             if hour >= 22 or hour < 6: #Switch off the backlight between 10pm to 6am
                 if str_humi == '0':
@@ -109,10 +168,10 @@ while True:
                     LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+ "°C")
                 else:
                     LCD.display(line1 = time_string, line2 = "T:"+str_temp+"°C H:"+str_humi+"%")
-        if while_loop_counter <= 0 and HOST_READY:
-            send (host=host, port=port, path=path, DEVICE_NAME=DEVICE_NAME, API_KEY=API_KEY, temp=temp, humi=humi)
+        if while_loop_counter <= 0 and HOST_READY: # server is connected 
             while_loop_counter = 12 # reset the counter
             print('Data sent to server')
+            send (host=host, port=port, path=path, DEVICE_NAME=DEVICE_NAME, API_KEY=API_KEY, temp=temp, humi=humi)                
     except Exception as e:
         print (str(e))
         continue
