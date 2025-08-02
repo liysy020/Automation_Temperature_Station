@@ -112,15 +112,20 @@ def receive_temperature(request):
         return
     try: # confirm if Device Name and API Key are matching with DB
         Sensor = Device.objects.get(Name=Name, Api_Key=Api_Key, Is_Active=True)
-    except Exception as e:
+    except Exception as e: # invalid sensor ignore its data
         return JsonResponse({"error": "Unauthorized"}, status=401)
-        pass
     try: # if the API call is the first call both Temp and Humi should be 0 otherwise it's trying to update data to the server
         Data = json.loads(request.body)
         Temp = Data.get("temperature")
         Humi = Data.get('humidity') if 'humidity' in Data else Data.get('humility')
         if Temp == 0 and Humi == 0: #both values are 0 indicated the Sensor is trying to setup itself 
-            return JsonResponse({'status': 'ok', 'sensor-type': Sensor.Device_Type}) #return the device type to sensor
+            return JsonResponse({'status': 'ok', 
+                'sensor-type': Sensor.Device_Type, 
+                'T_Low': Sensor.T_Comfort_Low, 
+                'T_High': Sensor.T_Comfort_High, 
+                'H_Low': Sensor.H_Comfort_Low, 
+                'H_High': Sensor.H_Comfort_High,
+            }) #return the device type to sensor
         else:
             Record = DeviceData(Sensor = Sensor, Temp = Temp, Humi = Humi)
             Record.save()
