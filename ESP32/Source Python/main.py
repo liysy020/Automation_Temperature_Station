@@ -38,7 +38,7 @@ switch2 = Pin(SW2_PIN, Pin.OUT) if SW2_PIN !=0 else None
 SW3_PIN = 0
 switch3 = Pin(SW3_PIN, Pin.OUT) if SW3_PIN !=0 else None
 # The PIN number that connected to an application. It will be power on when high humidity triggered
-SW4_PIN = 13
+SW4_PIN = 0
 switch4 = Pin(SW4_PIN, Pin.OUT) if SW4_PIN !=0 else None
 # Application trigger condtion. Value will be assign by initiating connection to server 
 T_Low = None
@@ -175,4 +175,5 @@ while True:
     except Exception as e:
         print (str(e))
         continue
+
     time.sleep(10)
