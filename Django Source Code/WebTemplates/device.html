@@ -64,10 +64,10 @@
     <h4> Device Name: {{ device.Name }}</h4>
     <h4> Device Type: {{ device.Device_Type }}</h4>
     {% if device.T_Comfort_Low != device.T_Comfort_High %}
-        <h4> Comfort Temperature set: from {{ device.T_Comfort_Low }} to {{ device.T_Comfort_High }} or notification will send out!</h4>
+        <h4> Comfort Temperature set between {{ device.T_Comfort_Low }} to {{ device.T_Comfort_High }} or notification will send out!</h4>
     {% endif %}
     {% if device.H_Comfort_Low != device.H_Comfort_High %}
-        <h4> Comfort Humidity set from {{ device.H_Comfort_Low }} to {{ device.H_Comfort_High }} or notification will send out!</h4>
+        <h4> Comfort Humidity set between {{ device.H_Comfort_Low }} to {{ device.H_Comfort_High }} or notification will send out!</h4>
     {% endif %}
     <h4> API Key: {{ device.Api_Key }}</h4>
     <table>
