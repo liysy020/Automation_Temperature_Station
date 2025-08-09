@@ -7,3 +7,7 @@ The project needs ESP32 running with micro Python. Tested 3x different types of 
 The sensor will need to register to the server in order to obtain a rendom generated API key. Communication running over SSL provides a secure channel.
 
 Email alert can be switched on to get notification when sensor detected value outside of your comfort zone settings.
+
+The sensor can also trigger external application such as exhaust fan when alert value met.
+
+Last but not least the server keeps 4 months data history of the sensors. The data can be display in graph views.
