@@ -1,0 +1,82 @@
+{% extends 'home.html' %}
+
+{% block content %}
+
+{% if error %}
+<h3>Error Information</h3>
+    {{ error }}
+{% endif %}
+
+{% if history_form %}
+    <form id = "historyForm" class="form" method="GET">
+        <br>
+        {% csrf_token %}
+        {{ history_form.as_p }}
+        <br><button class="btn btn-primary" type="submit">View</button>
+    </form>
+{% endif %}
+
+<canvas id="historyChart" style="width:100%;max-height:400px;"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let myChart = null;
+    document.getElementById("historyForm").addEventListener("submit", function(e) {
+        e.preventDefault(); // stop normal form submit
+
+        const formData = new FormData(this);
+        const sensor = formData.get("Sensor");
+        const range = formData.get("Range"); 
+
+        const params = new URLSearchParams({ sensor, range });
+
+        fetch(`/history?${params.toString()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.Created_At || data.Created_At.length === 0) {
+                    alert("No data found for this selection.");
+                    return;
+                }
+
+                const ctx = document.getElementById('historyChart').getContext('2d');
+                if (myChart) {
+                    myChart.destroy();
+                }
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.Created_At,
+                        datasets: [
+                            {
+                                label: 'Temperature (°C)',
+                                data: data.temp,
+                                borderColor: 'red',
+                                fill: false,
+                                tension: 0.3,
+                            },
+                            {
+                                label: 'Humidity (%)',
+                                data: data.humi,
+                                borderColor: 'blue',
+                                fill: false,
+                                tension: 0.3,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: data.Sensor_name  // Use sensor name as chart title
+                            }
+                        },
+                        scales: {
+                            y: { title: { display: true, text: 'Value' } }
+                        }
+                    }
+                });
+            });
+    });
+</script>
+{% endblock %}

@@ -14,12 +14,12 @@
 
 {% if search_form %}
 <a class="btn btn-primary" href="{% url 'register_device' %}">Register New Sensor</a>
-	<form class="form" method="post">
-		<br>
-		{% csrf_token %}
-		{{ search_form.as_p }}
-		<br><button class="btn btn-primary" type="submit">Search</button>
-	</form>
+    <form class="form" method="post">
+        <br>
+        {% csrf_token %}
+        {{ search_form.as_p }}
+        <br><button class="btn btn-primary" type="submit">Search</button>
+    </form>
 {% endif %}
 
 {% if register_device %}
