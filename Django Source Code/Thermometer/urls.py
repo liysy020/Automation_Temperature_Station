@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from Login.views import login_request as login, logout_request as logout
 from TempLog.views import list_device, register_device, delete_device, update_device, toggle_device_status, receive_temperature, display_current
-from TempLog.views import list_recipient, add_recipient, remove_recipient, smtp_setting, system_on_off
+from TempLog.views import list_recipient, add_recipient, remove_recipient, smtp_setting, system_on_off, history
 urlpatterns = [
     path('admin/', admin.site.urls),
     path ('', display_current, name = 'display_current'),
@@ -40,4 +40,5 @@ urlpatterns = [
     path ('smtp_setting/<int:pk>', smtp_setting, name = 'update_smtp_setting_pk'),
     path ('system/', system_on_off, name = 'system'),
     path ('system/<str:action>', system_on_off, name = 'system_on_off'),
+    path ('history/', history, name = 'history'),
 ]
