@@ -54,3 +54,22 @@ class UpdateSMTPForm(forms.ModelForm):
         self.fields['EMAIL_PORT'] = forms.IntegerField(label='SMTP Port')
         self.fields['EMAIL_HOST_USER'] = forms.CharField(label='Sender Address')
         self.fields['EMAIL_HOST_PASSWORD'] = forms.CharField(label='Password', required = False, widget = forms.PasswordInput)
+
+class DataHistory(forms.Form):
+    RANGE_CHOICES = [
+        ('1 Week', '1 Week'),
+        ('2 Weeks', '2 Weeks'),
+        ('3 Weeks', '3 Weeks'),
+        ('1 Month', '1 Month'),
+        ('2 Months', '2 Months'),
+        ('3 Months', '3 Months'),
+        ('All', 'All')
+    ]
+    Range = forms.ChoiceField(label = 'Last', choices = RANGE_CHOICES, initial = '1 Week')
+    Sensor = forms.ChoiceField (label = "Sensor")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["Sensor"].choices = [
+            (d.Name, d.Name)
+            for d in Device.objects.filter(Is_Active=True).order_by("Name")
+        ]

@@ -3,12 +3,13 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Device, DeviceData, EmailSetting, Recipient, Notification
-from .forms import SearchDevice, RegisterDevice, AddEmailRecipientForm, UpdateSMTPForm
+from .forms import SearchDevice, RegisterDevice, AddEmailRecipientForm, UpdateSMTPForm, DataHistory
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Avg
 import json, ipcalc
 from TempLog import scheduler
+import pandas
 
 def local(request): #bypass authentication if request is from local network
     localnetwork = ['10.0.0.0/8','172.16.0.0/12','192.168.0.0/16']
@@ -232,3 +233,42 @@ def system_on_off(request,action = 'None'):
                 return render (request,'system_on_off.html', {'status_on': True, 'user_auth': True})
             else:
                 return render (request,'system_on_off.html', {'error': [("Falsed to start. Please go back and retry!")], 'user_auth': True})
+
+def history (request):
+    if request.user.is_authenticated != True:
+        return redirect ('/login/?next=/history')
+    if request.method == 'GET' and 'sensor' in request.GET:
+        Sensor_Name = request.GET.get('sensor')
+        Range = request.GET.get('range')
+
+        history_range = None # obtain all records
+        if '1 Week' in Range: # obtain the last 7 days records
+            history_range = timezone.now() - timedelta(days=7)
+        elif '2 Weeks' in Range:
+            history_range = timezone.now() - timedelta(days=14)
+        elif '3 Weeks' in Range:
+            history_range = timezone.now() - timedelta(days=21)
+        elif '1 Month' in Range:
+            history_range = timezone.now() - timedelta(days=30)
+        elif '2 Months' in Range:
+            history_range = timezone.now() - timedelta(days=60)
+        elif '3 Months' in Range:
+            history_range = timezone.now() - timedelta(days=90)
+        
+        if history_range:
+            history_data = DeviceData.objects.filter(Sensor__Name = Sensor_Name, Created_At__gte = history_range).order_by('Created_At')
+        else:
+            history_data = DeviceData.objects.filter(Sensor__Name = Sensor_Name).order_by('Created_At')
+        
+        data_frame = pandas.DataFrame.from_records(history_data.values('Sensor__Name', 'Temp', 'Humi', 'Created_At'))
+        if not data_frame.empty:
+            data_frame["Created_At"] = data_frame['Created_At'].apply(lambda dt: timezone.localtime(dt))
+            return JsonResponse({
+                'Sensor_name': Sensor_Name,
+                'Created_At': data_frame['Created_At'].dt.strftime('%Y-%m-%d %H:%M').tolist(),
+                'temp': data_frame['Temp'].tolist(),
+                'humi': data_frame['Humi'].tolist(),
+            })
+        else:
+            return JsonResponse({'error': 'No data found for this selection.'}, status=404)
+    return render (request, 'history.html', {'history_form': DataHistory(), 'user_auth': True})
