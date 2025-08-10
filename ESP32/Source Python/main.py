@@ -20,7 +20,7 @@ localtime = local_time(offset=TZ_Offset, dls_start=(DLS_Start_Month,DLS_Start_Da
 SDA_PIN = 0
 SCL_PIN = 0
 #Initial LCD display module LCD1602
-LCD = LCD_Display(SDA_PIN,SCL_PIN)
+LCD = LCD_Display(SDA_PIN,SCL_PIN) if SDA_PIN != 0 and SCL_PIN != 0 else None
 
 #Temperature Sensor PIN number
 TEMP_PIN = 0
@@ -177,4 +177,5 @@ while True:
         continue
 
     time.sleep(10)
+
 
