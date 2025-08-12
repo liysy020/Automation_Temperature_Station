@@ -134,3 +134,46 @@ input:checked + .slider:before {
 .data-table tr:nth-child(even) {
     background-color: #f9f9f9;
 }
+/* Ensure images resize */
+img {
+    max-width: 100%;
+    height: auto;
+}
+/* Hide desktop sidebar on small screens */
+@media (max-width: 767px) {
+    /* Hide this navbar on desktop */
+    .mobile-navbar {
+        display: none;
+    }
+    .sidebar {
+        display: none;
+    }
+    .content {
+        width: 100% !important;
+        padding: 15px;
+    }
+    .row {
+        padding: 15px;
+    }
+    .data-table {
+        width: 100%;
+        font-size: 1.2em;
+    }
+}
+#mobileOverlayMenu a {
+  color: #fee336 !important;
+  font-size: 18px; /* adjust size if needed */
+  text-decoration: none; 
+}
+#mobileOverlayMenu a:hover {
+  background-color: #626B66 !important;
+}
+/* Remove box/outline around hamburger */
+.navbar-default,
+.navbar-default .navbar-header {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
