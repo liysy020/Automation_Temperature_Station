@@ -16,7 +16,7 @@
     </form>
 {% endif %}
 
-<canvas id="historyChart" style="width:100%;max-height:400px;"></canvas>
+<canvas id="historyChart"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -37,8 +37,19 @@
                     alert("No data found for this selection.");
                     return;
                 }
+                // Detect device size
+                const isMobile = window.innerWidth <= 767;
+                const canvas = document.getElementById('historyChart');
+                // Set canvas dimensions based on device type
+                if (isMobile) {
+                    canvas.width = 820;
+                    canvas.height = 640;
+                } else {
+                    canvas.width = 820;
+                    canvas.height = 400;
+                }
 
-                const ctx = document.getElementById('historyChart').getContext('2d');
+                const ctx = canvas.getContext('2d');
                 if (myChart) {
                     myChart.destroy();
                 }
@@ -79,4 +90,5 @@
             });
     });
 </script>
+
 {% endblock %}
