@@ -24,6 +24,8 @@ LCD = LCD_Display(SDA_PIN,SCL_PIN) if SDA_PIN != 0 and SCL_PIN != 0 else None
 
 #Temperature Sensor PIN number
 TEMP_PIN = 0
+# When the sensor placed too close to ESP chip
+TEMP_OFFSET = 0.0
 #Inital temperature sensor DS18B20
 SENSOR_READY = False
 
@@ -83,13 +85,16 @@ try:
             body_str = body_bytes.decode('utf-8')
             body_json = json.loads(body_str)
             
-            if 'Temperature' in body_json.get("sensor-type"):
-                sensor = sensors.sensor_ds18x20(TEMP_PIN)
-            elif 'Humidity' in body_json.get("sensor-type") and 'DHT11' in body_json.get("sensor-type"):
-                sensor = sensors.sensor_dht11(TEMP_PIN)
-            elif 'Humidity' in body_json.get("sensor-type") and 'DHT22' in body_json.get("sensor-type"):
-                sensor = sensors.sensor_dht22(TEMP_PIN)
-            SENSOR_READY = True
+            if TEMP_PIN == 0:
+                SENSOR_READY = False
+            else:
+                if 'Temperature' in body_json.get("sensor-type"):
+                    sensor = sensors.sensor_ds18x20(TEMP_PIN)
+                elif 'Humidity' in body_json.get("sensor-type") and 'DHT11' in body_json.get("sensor-type"):
+                    sensor = sensors.sensor_dht11(TEMP_PIN)
+                elif 'Humidity' in body_json.get("sensor-type") and 'DHT22' in body_json.get("sensor-type"):
+                    sensor = sensors.sensor_dht22(TEMP_PIN)
+                SENSOR_READY = True
 
             T_Low = body_json.get("T_Low")
             T_High = body_json.get("T_High")
@@ -106,6 +111,12 @@ except Exception as e:
     print ('Failed to setup sensor type or server is not available '+str(e))
     SENSOR_READY = False
 
+# print out device status:
+if not LCD:
+    print ('LCD is not configured!')
+if not SENSOR_READY:
+    print ('Sensor is not ready')
+    
 while_loop_counter = 12 #data will send to server every 2 mins while display refresh every 10 sec
 while True:
     try:
@@ -120,9 +131,10 @@ while True:
             try:
                 if data:
                     temp, humi = data
+                    temp = temp - TEMP_OFFSET
             except:
                 if data:
-                    temp = data
+                    temp = data - TEMP_OFFSET
             str_temp = str(temp)
             str_humi = str(humi)
             if switch1 and T_Low:
@@ -156,26 +168,24 @@ while True:
                 
         time_string = localtime.get_display_time()
         t = localtime.get_time()
-        if t and LCD.lcd != None: # LCD attached
-            hour = t[3]
-            if hour >= 22 or hour < 6: #Switch off the backlight between 10pm to 6am
-                if str_humi == '0':
-                    LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+"°C", backlight = False)
+        if LCD:
+            if t and LCD.lcd != None: # LCD attached
+                hour = t[3]
+                if hour >= 22 or hour < 6: #Switch off the backlight between 10pm to 6am
+                    if str_humi == '0':
+                        LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+"°C", backlight = False)
+                    else:
+                        LCD.display(line1 = time_string, line2 = "T:"+str_temp+"°C H:"+str_humi+"%", backlight = False)
                 else:
-                    LCD.display(line1 = time_string, line2 = "T:"+str_temp+"°C H:"+str_humi+"%", backlight = False)
-            else:
-                if str_humi == '0':
-                    LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+ "°C")
-                else:
-                    LCD.display(line1 = time_string, line2 = "T:"+str_temp+"°C H:"+str_humi+"%")
-        if while_loop_counter <= 0 and HOST_READY: # server is connected 
+                    if str_humi == '0':
+                        LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+ "°C")
+                    else:
+                        LCD.display(line1 = time_string, line2 = "T:"+str_temp+"°C H:"+str_humi+"%")
+        if while_loop_counter <= 0 and HOST_READY and SENSOR_READY: # server is connected 
             while_loop_counter = 12 # reset the counter
             print('Data sent to server')
             send (host=host, port=port, path=path, DEVICE_NAME=DEVICE_NAME, API_KEY=API_KEY, temp=temp, humi=humi)                
     except Exception as e:
         print (str(e))
         continue
-
     time.sleep(10)
-
-
