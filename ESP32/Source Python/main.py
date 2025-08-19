@@ -25,8 +25,9 @@ LCD = LCD_Display(SDA_PIN,SCL_PIN) if SDA_PIN != 0 and SCL_PIN != 0 else None
 #Temperature Sensor PIN number
 TEMP_PIN = 0
 # When the sensor placed too close to ESP chip
-TEMP_OFFSET = 0.0
-#Inital temperature sensor DS18B20
+TEMP_OFFSET = 0
+HUMI_OFFSET = 0
+#Initalize temperature sensor
 SENSOR_READY = False
 
 # PLC application PIN. Set to 0 will disable power trigging function
@@ -132,6 +133,7 @@ while True:
                 if data:
                     temp, humi = data
                     temp = temp - TEMP_OFFSET
+                    humi = humi - HUMI_OFFSET
             except:
                 if data:
                     temp = data - TEMP_OFFSET
