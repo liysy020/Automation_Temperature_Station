@@ -242,7 +242,20 @@ def history (request):
         Range = request.GET.get('range')
 
         history_range = None # obtain all records
-        if '1 Week' in Range: # obtain the last 7 days records
+        if 'today' in Range:
+            now = timezone.localtime(timezone.now())
+            history_range = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif '2 days' in Range:
+            history_range = timezone.now() - timedelta(days=2)
+        elif '3 days' in Range:
+            history_range = timezone.now() - timedelta(days=3)
+        elif '4 days' in Range:
+            history_range = timezone.now() - timedelta(days=4)
+        elif '5 days' in Range:
+            history_range = timezone.now() - timedelta(days=5)
+        elif '6 days' in Range:
+            history_range = timezone.now() - timedelta(days=6)
+        elif '1 Week' in Range: # obtain the last 7 days records
             history_range = timezone.now() - timedelta(days=7)
         elif '2 Weeks' in Range:
             history_range = timezone.now() - timedelta(days=14)

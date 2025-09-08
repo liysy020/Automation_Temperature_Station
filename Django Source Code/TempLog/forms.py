@@ -57,6 +57,12 @@ class UpdateSMTPForm(forms.ModelForm):
 
 class DataHistory(forms.Form):
     RANGE_CHOICES = [
+        ('today', 'today'),
+        ('2 days', '2 days'),
+        ('3 days', '3 days'),
+        ('4 days', '4 days'),
+        ('5 days', '5 days'),
+        ('6 days', '6 days'),
         ('1 Week', '1 Week'),
         ('2 Weeks', '2 Weeks'),
         ('3 Weeks', '3 Weeks'),
