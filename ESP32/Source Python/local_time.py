@@ -61,16 +61,19 @@ class local_time:
             print('Failed to get system time due to time sync issue')
             return None
 
-    def get_display_time(self):
-        MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    def get_display_time(self,CN=False):
         t= self.get_time()
         if not t:
             return 'Time Error'
         hour = t[3]
         minute = t[4]
         day = t[2]
-        month_index = t[1] - 1
-        month_abbr = MONTHS[month_index] if 0 <= month_index < 12 else '???'
-        time_str = "{:02d}:{:02d}  {:02d} {}".format(hour, minute, day, month_abbr)
+        month = t[1]
+        if CN:
+            time_str = "{:02d}:{:02d}  {:02d}-{:02d}".format(hour, minute, month, day)
+        else:
+            MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            month_abbr = MONTHS[month - 1] if 1 <= month <= 12 else '???'
+            time_str = "{:02d}:{:02d}  {:02d} {}".format(hour, minute, day, month_abbr)
         return time_str
