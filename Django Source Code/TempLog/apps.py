@@ -18,3 +18,7 @@ class TemplogConfig(AppConfig):
         # define a fake sensor device for email notification purpose
         from .models import Device
         fake_sensor, created = Device.objects.get_or_create(Name='All',Is_Active=False)
+        # start the job
+        from TempLog import scheduler
+        if not scheduler.has_jobs():
+            scheduler.run()
