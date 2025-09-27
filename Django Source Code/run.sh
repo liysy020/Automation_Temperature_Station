@@ -7,5 +7,5 @@ AUTOMATION_DIR="/Automation"
 source "$AUTOMATION_DIR/bin/activate"
 
 # Run the Django server with SSL
-"$AUTOMATION_DIR/bin/gunicorn" Thermometer.wsgi:application --bind 127.0.0.1:8000
+"$AUTOMATION_DIR/bin/gunicorn" --chdir $AUTOMATION_DIR --bind 127.0.0.1:8000 Thermometer.wsgi:application
 exit 0
