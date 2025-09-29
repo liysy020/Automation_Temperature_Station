@@ -141,7 +141,7 @@ def display_current(request):
     sensor_data=[]
     if request.method == 'GET':
         five_minutes_ago = timezone.now() - timedelta(minutes=5)
-        for sensor in Device.objects.filter(Is_Active = True):
+        for sensor in Device.objects.filter(Is_Active = True).order_by('Name'):
             current_temp = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_temp=Avg('Temp'))['avg_temp']
             current_humi = DeviceData.objects.filter(Sensor__Name = sensor.Name, Created_At__gte=five_minutes_ago).aggregate(avg_humi=Avg('Humi'))['avg_humi']
             if current_temp !=None and current_humi != None:
