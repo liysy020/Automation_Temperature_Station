@@ -25,9 +25,9 @@ SECRET_KEY = 'django-insecure-@as234sdiwevy$#c%d+pej@)+3#p(-*-72&mk8!tb9qb33e+ze
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 #additional host from reverse proxy server
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 #additional URL from reverse proxy server
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
