@@ -1,6 +1,7 @@
 import network, time, json
 from upload import send
 from local_time import local_time
+from display_OLED1306 import OLED_Display
 from display_LCD1602 import LCD_Display
 import sensors
 from machine import Pin
@@ -19,8 +20,11 @@ localtime = local_time(offset=TZ_Offset, dls_start=(DLS_Start_Month,DLS_Start_Da
 #LCD Display PIN number
 SDA_PIN = 0
 SCL_PIN = 0
-#Initial LCD display module LCD1602
+# Initial LCD display module LCD1602
 LCD = LCD_Display(SDA_PIN,SCL_PIN) if SDA_PIN != 0 and SCL_PIN != 0 else None
+
+# Initial OLED display module 128x32 as default with width=128 and height=32
+#LCD = OLED_Display(SDA_PIN,SCL_PIN) if SDA_PIN != 0 and SCL_PIN != 0 else None
 
 #Temperature Sensor PIN number
 TEMP_PIN = 0
@@ -171,13 +175,18 @@ while True:
         time_string = localtime.get_display_time()
         t = localtime.get_time()
         if LCD:
-            if t and LCD.lcd != None: # LCD attached
+            if isinstance (LCD, OLED_Display) and LCD.lcd !=None: # for OLED display to print in big font
+                if str_humi == '0': #temperture sensor
+                    LCD.display (temp = str(int(temp)))
+                else: # temperture and humidity combined sensor
+                    LCD.display (temp = str(int(temp)), humi = str(int(humi)))
+            elif isinstance (LCD, LCD_Display) and t and LCD.lcd != None: # LCD display print datetime and temp/humi
                 hour = t[3]
                 if hour >= 22 or hour < 6: #Switch off the backlight between 10pm to 6am
                     if str_humi == '0':
-                        LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+"°C", backlight = False)
+                        LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+"C", backlight = False)
                     else:
-                        LCD.display(line1 = time_string, line2 = "T:"+str_temp+"°C H:"+str_humi+"%", backlight = False)
+                        LCD.display(line1 = time_string, line2 = "T:"+str_temp+"C H:"+str_humi+"%", backlight = False)
                 else:
                     if str_humi == '0':
                         LCD.display(line1 = time_string, line2 = "Temp:  "+str_temp+ "°C")
