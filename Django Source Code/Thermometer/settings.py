@@ -27,7 +27,7 @@ DEBUG = False
 #additional host from reverse proxy server
 ALLOWED_HOSTS = ['*']
 #additional URL from reverse proxy server
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://<your-server-FQDN>',]
 # Application definition
 
 INSTALLED_APPS = [
