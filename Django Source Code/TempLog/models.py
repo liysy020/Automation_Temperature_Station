@@ -12,7 +12,7 @@ class Device(models.Model):
     ]
     id = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=50, unique=True)
-    Device_Type = models.CharField (choices = DEVICE_CHOICES, default = 'Temperature Sensor')
+    Device_Type = models.CharField (choices = DEVICE_CHOICES, max_length=50, default = 'Temperature Sensor')
     T_Comfort_Low = models.DecimalField(max_digits=5, decimal_places=1, default=0)
     T_Comfort_High = models.DecimalField(max_digits=5, decimal_places=1, default=0)
     H_Comfort_Low = models.DecimalField(max_digits=5, decimal_places=1, default=0)
