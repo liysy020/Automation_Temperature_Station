@@ -56,7 +56,6 @@ class local_time:
                 if self.is_dst(t):
                     offset += 3600  # Add 1 hour for DST
             local_time = time.localtime(time.mktime(t) + offset)
-            print (local_time)
             return local_time
         except Exception as e:
             print('Failed to get system time due to time sync issue')
@@ -79,3 +78,4 @@ class local_time:
             month_abbr = MONTHS[month - 1] if 1 <= month <= 12 else '???'
             time_str = "{:02d}:{:02d}  {:02d} {}".format(hour, minute, day, month_abbr)
         return time_str
+
