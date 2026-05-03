@@ -24,10 +24,10 @@ SCL_PIN = 0
 # Initial LCD display module LCD1602
 #LCD = LCD_Display(SDA_PIN,SCL_PIN) if SDA_PIN != 0 and SCL_PIN != 0 else None
 
-# Initial OLED display module 128x32 as default with 128x32
+# Initial OLED display module 128x32
 #LCD = OLED_128x32(SDA_PIN,SCL_PIN) if SDA_PIN != 0 and SCL_PIN != 0 else None
 
-# Initial OLED display module 128x32 as default with 128x64
+# Initial OLED display module 128x64
 LCD = OLED_128x64(SDA_PIN,SCL_PIN) if SDA_PIN != 0 and SCL_PIN != 0 else None
 
 #Temperature Sensor PIN number
